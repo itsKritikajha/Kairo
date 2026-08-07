@@ -34,7 +34,10 @@
           <span>Founder: <strong>Kritika Jha</strong></span>
         </div>
 
-        <div class="avatar-circle" title="Student Learner Profile">KJ</div>
+        <button id="btn-user-profile" class="user-profile-btn">
+          <div class="avatar-circle">KJ</div>
+          <span id="header-user-name" style="font-size: 0.82rem; font-weight: 600;">Kritika Jha</span>
+        </button>
       </div>
     </header>
 
@@ -102,84 +105,94 @@
     <main class="main-content">
 
       <!-- ===================================================================
-           TAB 1: AI MENTOR CHAT
+           TAB 1: AI MENTOR CHAT (WITH VOICE & ATTACHMENT & SAVED CHATS)
            =================================================================== -->
       <section id="ai-mentor" class="tab-pane active">
         <div class="page-title-box">
-          <h2>🤖 AI Mentor</h2>
-          <p>Your 24/7 personal tutor explaining complex concepts from beginner to advanced levels.</p>
+          <div>
+            <h2>🤖 AI Mentor</h2>
+            <p>Your 24/7 personal tutor explaining concepts, debugging code, DSA, and interview prep.</p>
+          </div>
         </div>
 
-        <div class="chat-container">
-          <div class="chat-toolbar">
-            <div class="mentor-profile">
-              <div class="mentor-avatar">🧠</div>
-              <div class="mentor-info">
-                <h3>KAIRO Tutor AI</h3>
-                <span><span class="dot-online"></span> Active • Ready to clarify</span>
+        <div class="chat-layout">
+          <!-- Saved Chats Sidebar -->
+          <div class="chat-history-sidebar">
+            <button id="btn-new-chat-session" class="btn-new-chat">+ New Chat</button>
+            <div style="font-size: 0.75rem; color: var(--text-subtle); text-transform: uppercase; font-weight: 600; margin-top: 0.5rem;">Saved Conversations</div>
+            <div id="chat-history-list" class="chat-history-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Chat Container -->
+          <div class="chat-container">
+            <div class="chat-toolbar">
+              <div class="mentor-profile">
+                <div class="mentor-avatar">🧠</div>
+                <div class="mentor-info">
+                  <h3 id="current-chat-title">KAIRO Tutor AI</h3>
+                  <span><span class="dot-online"></span> Active • OpenAI/Gemini Ready</span>
+                </div>
+              </div>
+
+              <div class="chat-tools-right">
+                <button id="btn-toggle-voice-output" class="btn-icon-toggle active" title="Toggle AI Voice Output (Speech Synthesis)">🔊</button>
+
+                <select id="depth-select" class="select-custom">
+                  <option value="beginner">🌱 Beginner (ELIF5)</option>
+                  <option value="intermediate" selected>⚡ Intermediate (Practical Code)</option>
+                  <option value="advanced">🔬 Deep Dive (Architecture & Math)</option>
+                </select>
               </div>
             </div>
 
-            <div class="mode-selector">
-              <label for="depth-select">Depth Level:</label>
-              <select id="depth-select" class="select-custom">
-                <option value="beginner">🌱 Beginner (ELIF5)</option>
-                <option value="intermediate" selected>⚡ Intermediate (Practical Code)</option>
-                <option value="advanced">🔬 Deep Dive (Architecture & Math)</option>
-              </select>
+            <div class="chat-messages" id="chat-messages">
+              <!-- Rendered dynamically -->
             </div>
-          </div>
 
-          <div class="chat-messages" id="chat-messages">
-            <!-- Initial Bot Welcome -->
-            <div class="msg-wrapper bot">
-              <div class="msg-bubble">
-                Hello Kritika! 👋 I am your KAIRO AI Mentor. What topic would you like to master today? 
-                Whether you want to unpack Data Structures, System Design, AI Algorithms, or refine your placement prep, I'm here to break it down!
-                <span class="msg-time">Just now</span>
-              </div>
+            <div class="quick-prompts">
+              <button class="prompt-chip" data-prompt="Explain Recursion vs Iteration with code examples">💡 Recursion vs Iteration</button>
+              <button class="prompt-chip" data-prompt="Debug my code and find memory leaks">🛠️ Debug My Code</button>
+              <button class="prompt-chip" data-prompt="What are the top 3 concepts for System Design interviews?">📐 System Design 101</button>
+              <button class="prompt-chip" data-prompt="Give me a 30-day AI Engineering study strategy">🤖 AI Study Strategy</button>
             </div>
-          </div>
 
-          <div class="quick-prompts">
-            <button class="prompt-chip" data-prompt="Explain Recursion vs Iteration with code examples">💡 Recursion vs Iteration</button>
-            <button class="prompt-chip" data-prompt="What are the top 3 concepts for System Design interviews?">📐 System Design 101</button>
-            <button class="prompt-chip" data-prompt="How do I prepare for a React + Next.js technical round?">⚡ Next.js Interview Tips</button>
-            <button class="prompt-chip" data-prompt="Give me a 30-day AI Engineering study strategy">🤖 AI Study Strategy</button>
-          </div>
+            <div class="chat-input-bar">
+              <input type="file" id="file-upload-input" style="display: none;" accept=".txt,.pdf,.png,.jpg,.js,.py">
+              <button id="btn-attach-file" class="btn-input-icon" title="Upload Image / PDF Document">📎</button>
 
-          <div class="chat-input-bar">
-            <input type="text" id="chat-input" class="chat-input" placeholder="Ask KAIRO anything (e.g., 'How does gradient descent work?')..." autocomplete="off">
-            <button id="btn-send-chat" class="btn-send">
-              <span>Send</span> ➔
-            </button>
+              <input type="text" id="chat-input" class="chat-input" placeholder="Ask KAIRO anything or attach code/documents..." autocomplete="off">
+              
+              <button id="btn-voice-input" class="btn-input-icon" title="Speak to KAIRO (Speech-to-Text)">🎙️</button>
+              
+              <button id="btn-send-chat" class="btn-send">Send ➔</button>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- ===================================================================
-           TAB 2: PERSONALIZED ROADMAP
+           TAB 2: PERSONALIZED ROADMAP (AI GENERATOR FORM & TIMELINE)
            =================================================================== -->
       <section id="roadmap" class="tab-pane">
         <div class="page-title-box">
-          <h2>🎯 Personalized Learning Roadmap</h2>
-          <p>Step-by-step career acceleration tracks curated for software, AI, and security engineering.</p>
+          <div>
+            <h2>🎯 Personalized Learning Roadmap</h2>
+            <p>AI-generated daily milestones tailored to your career goal, college year, and study hours.</p>
+          </div>
+          <div class="roadmap-header-actions">
+            <button id="btn-open-roadmap-modal" class="btn-gen-roadmap">✨ Generate Custom AI Roadmap</button>
+          </div>
         </div>
 
         <div class="roadmap-controls">
-          <div class="track-tabs" id="track-tabs">
-            <button class="track-tab active" data-track="swe">💻 Software Engineer</button>
-            <button class="track-tab" data-track="ai">🤖 AI & ML Specialist</button>
-            <button class="track-tab" data-track="ds">📊 Data Science</button>
-            <button class="track-tab" data-track="cyber">🛡️ Cyber Security</button>
-          </div>
-
           <div class="overall-progress">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Track Progress:</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Total Goal Completion:</span>
             <div class="progress-bar-bg">
               <div class="progress-bar-fill" id="track-progress-fill"></div>
             </div>
-            <span id="track-progress-pct" style="font-weight: 700; font-size: 0.9rem;">35%</span>
+            <span id="track-progress-pct" style="font-weight: 700; font-size: 0.9rem;">14%</span>
           </div>
         </div>
 
@@ -189,24 +202,28 @@
       </section>
 
       <!-- ===================================================================
-           TAB 3: SMART PLANNER
+           TAB 3: SMART PLANNER (DRAG & DROP SCHEDULE + POMODORO TIMER)
            =================================================================== -->
       <section id="planner" class="tab-pane">
         <div class="page-title-box">
-          <h2>⏰ Smart Planner & Focus Timer</h2>
-          <p>Balance study, college commitments, health, and rest with AI load balancing.</p>
+          <div>
+            <h2>⏰ Smart Planner & Focus Timer</h2>
+            <p>AI-balanced daily timeline with drag-and-drop schedule editing.</p>
+          </div>
+          <button id="btn-ai-auto-schedule" class="btn-gen-roadmap">✨ AI Auto-Balance Schedule</button>
         </div>
 
         <div class="planner-grid">
           <div class="planner-tasks-panel glass-panel">
-            <h3>Today's Target Schedule</h3>
+            <h3>Daily Timeline Schedule (Drag & Drop to Reorder)</h3>
             
             <div class="task-form-box">
-              <input type="text" id="task-title-input" class="task-input" placeholder="Add a focus task (e.g., 'Solve 2 LeetCode Mediums')...">
+              <input type="text" id="task-title-input" class="task-input" placeholder="Add custom task (e.g., 'Practice System Design')...">
               <select id="task-category-select" class="category-select">
                 <option value="study">📚 Study</option>
                 <option value="college">🏫 College</option>
                 <option value="health">🏋️ Health</option>
+                <option value="interview">🎯 Interview</option>
                 <option value="rest">🧘 Rest</option>
               </select>
               <button id="btn-add-task" class="btn-add-task">+ Add</button>
@@ -242,8 +259,10 @@
            =================================================================== -->
       <section id="dashboard" class="tab-pane">
         <div class="page-title-box">
-          <h2>📊 Growth & Velocity Dashboard</h2>
-          <p>Track your real-time consistency, weekly velocity, and skill acquisition.</p>
+          <div>
+            <h2>📊 Growth & Velocity Dashboard</h2>
+            <p>Real-time analytics for study hours, streak, problems solved, and AI usage score.</p>
+          </div>
         </div>
 
         <div class="stats-grid">
@@ -251,31 +270,31 @@
             <div class="stat-icon-box icon-purple">🔥</div>
             <div class="stat-info">
               <h3>Active Streak</h3>
-              <div class="stat-val">12 Days</div>
+              <div class="stat-val" id="stat-streak-val">12 Days</div>
             </div>
           </div>
 
           <div class="glass-panel stat-card">
-            <div class="stat-icon-box icon-cyan">📈</div>
+            <div class="stat-icon-box icon-cyan">⏱️</div>
             <div class="stat-info">
-              <h3>Weekly Velocity</h3>
-              <div class="stat-val">+34%</div>
+              <h3>Study Hours</h3>
+              <div class="stat-val" id="stat-hours-val">48.5 hrs</div>
             </div>
           </div>
 
           <div class="glass-panel stat-card">
-            <div class="stat-icon-box icon-emerald">⏱️</div>
+            <div class="stat-icon-box icon-emerald">🧮</div>
             <div class="stat-info">
-              <h3>Hours Focused</h3>
-              <div class="stat-val">48.5 hrs</div>
+              <h3>Problems Solved</h3>
+              <div class="stat-val" id="stat-problems-val">42</div>
             </div>
           </div>
 
           <div class="glass-panel stat-card">
-            <div class="stat-icon-box icon-amber">🎓</div>
+            <div class="stat-icon-box icon-amber">🎯</div>
             <div class="stat-info">
-              <h3>Mastery Index</h3>
-              <div class="stat-val">87%</div>
+              <h3>Productivity Score</h3>
+              <div class="stat-val" id="stat-score-val">88/100</div>
             </div>
           </div>
         </div>
@@ -283,7 +302,7 @@
         <div class="dashboard-details">
           <div class="glass-panel">
             <h3>Weekly Focus Hours</h3>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Daily distribution across the current week</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Daily study distribution across the current week</p>
             <div class="weekly-bars">
               <div class="bar-col"><div class="bar-fill" style="height: 65%;"></div><span class="bar-day">Mon</span></div>
               <div class="bar-col"><div class="bar-fill" style="height: 80%;"></div><span class="bar-day">Tue</span></div>
@@ -296,38 +315,15 @@
           </div>
 
           <div class="glass-panel">
-            <h3>Unlocked Mastery Badges</h3>
-            <div class="badge-grid">
-              <div class="badge-item">
-                <span class="badge-icon">⚡</span>
-                <div>
-                  <h4>Consistency Queen</h4>
-                  <p>Maintained 10+ day streak</p>
-                </div>
+            <h3>AI Tutor Usage & Mastery Badges</h3>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                <span>AI Prompt Queries Used:</span>
+                <strong style="color: var(--accent-cyan);">14,200 tokens</strong>
               </div>
-
-              <div class="badge-item">
-                <span class="badge-icon">🧮</span>
-                <div>
-                  <h4>Algo Explorer</h4>
-                  <p>Completed 25 LeetCode problems</p>
-                </div>
-              </div>
-
-              <div class="badge-item">
-                <span class="badge-icon">🚀</span>
-                <div>
-                  <h4>Project Crusher</h4>
-                  <p>Built 1 full-stack app</p>
-                </div>
-              </div>
-
-              <div class="badge-item">
-                <span class="badge-icon">🎯</span>
-                <div>
-                  <h4>Focus Master</h4>
-                  <p>Completed 15 Pomodoro sessions</p>
-                </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                <span>Flashcards Mastered:</span>
+                <strong style="color: var(--accent-emerald);">8 / 10</strong>
               </div>
             </div>
           </div>
@@ -335,32 +331,41 @@
       </section>
 
       <!-- ===================================================================
-           TAB 5: SMART NOTES
+           TAB 5: SMART NOTES & 3D FLASHCARDS
            =================================================================== -->
       <section id="notes" class="tab-pane">
         <div class="page-title-box">
-          <h2>📝 Smart Notes & Knowledge Base</h2>
-          <p>Capture key takeaways and let KAIRO AI auto-summarize core concepts.</p>
+          <div>
+            <h2>📝 Smart Notes & AI Flashcards</h2>
+            <p>Write concept notes, let AI summarize, convert to 3D flashcards, and export PDF.</p>
+          </div>
         </div>
 
         <div class="notes-layout">
           <div class="notes-sidebar">
-            <button id="btn-new-note" class="btn-new-note">
-              <span>+ New Note</span>
-            </button>
+            <input type="text" id="note-search-input" class="search-input" placeholder="🔍 Search notes...">
+            <button id="btn-new-note" class="btn-new-note">+ New Note</button>
             <div class="note-list-items" id="note-list-items">
               <!-- Rendered via JS -->
             </div>
           </div>
 
           <div class="note-editor-panel glass-panel">
-            <input type="text" id="note-title-input" class="note-title-input" placeholder="Note Title...">
+            <div class="note-toolbar-top">
+              <input type="text" id="note-title-input" class="note-title-input" placeholder="Note Title...">
+              <button id="btn-export-pdf" class="btn-timer" style="font-size: 0.8rem;">📄 Export PDF</button>
+            </div>
+
             <textarea id="note-body-textarea" class="note-body-textarea" placeholder="Start typing your concepts, code snippets, or interview questions here..."></textarea>
             
-            <div class="note-summary-box">
-              <h5>✨ KAIRO AI Takeaways Summary</h5>
-              <p id="note-ai-summary" style="font-size: 0.82rem; color: var(--text-muted);">Click 'Summarize' to extract key action items and core formulas.</p>
-              <button id="btn-summarize-note" class="btn-timer" style="margin-top: 0.75rem; font-size: 0.78rem;">✨ Generate AI Summary</button>
+            <div class="flashcard-actions">
+              <button id="btn-summarize-note" class="btn-timer" style="font-size: 0.8rem;">✨ AI Summarize</button>
+              <button id="btn-gen-flashcards" class="btn-timer primary" style="font-size: 0.8rem;">🃏 Convert to 3D Flashcards</button>
+            </div>
+
+            <div class="note-summary-box" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-lg); padding: 1rem; margin-top: 0.5rem;">
+              <h5 style="color: #67E8F9; font-size: 0.85rem; margin-bottom: 0.4rem;">✨ AI Summary & Takeaways</h5>
+              <p id="note-ai-summary" style="font-size: 0.82rem; color: var(--text-muted);">Select a note and click 'AI Summarize' to extract key bullet points.</p>
             </div>
           </div>
         </div>
@@ -368,6 +373,88 @@
 
     </main>
 
+  </div>
+
+  <!-- 3D Flashcard Study Modal -->
+  <div id="flashcard-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>🃏 AI Flashcards Study Deck</h3>
+        <button id="btn-close-flashcards" style="background: none; border: none; color: #FFF; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Click the card to flip between Question and Answer.</p>
+
+      <div class="flashcard-container" id="flashcard-card">
+        <div class="flashcard-inner">
+          <div class="flashcard-front" id="flashcard-front-text">Question loading...</div>
+          <div class="flashcard-back" id="flashcard-back-text">Answer loading...</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button id="btn-prev-card" class="btn-timer">← Previous</button>
+        <span id="flashcard-counter" style="font-size: 0.85rem; font-weight: 600;">1 / 2</span>
+        <button id="btn-next-card" class="btn-timer primary">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Roadmap Generator Form Modal -->
+  <div id="roadmap-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3>🤖 Generate Personalized AI Roadmap</h3>
+        <button id="btn-close-roadmap-modal" style="background: none; border: none; color: #FFF; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="roadmap-form" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Career Goal:</label>
+          <input type="text" id="rm-goal" class="task-input" value="Full-Stack AI Engineer" style="width: 100%;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">College Year:</label>
+            <select id="rm-year" class="category-select" style="width: 100%;">
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year" selected>3rd Year</option>
+              <option value="4th Year / Graduate">4th Year / Graduate</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Skill Level:</label>
+            <select id="rm-skill" class="category-select" style="width: 100%;">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate" selected>Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Available Hours / Day:</label>
+          <input type="number" id="rm-hours" class="task-input" value="4" min="1" max="12" style="width: 100%;">
+        </div>
+
+        <button type="submit" class="btn-send" style="width: 100%; margin-top: 0.5rem; justify-content: center;">🚀 Generate Roadmap</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Profile / Auth Modal -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-box" style="text-align: center;">
+      <h3>🚀 Welcome to Project KAIRO</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">From Potential to Progress.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button id="btn-login-demo" class="btn-send" style="justify-content: center; width: 100%;">Continue as Kritika Jha (Demo Session)</button>
+        <p style="font-size: 0.75rem; color: var(--text-subtle);">Active User: <strong>kritika@kairo.ai</strong></p>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>

@@ -1,9 +1,16 @@
 /**
- * KAIRO — App Engine
- * Interactive logic for AI Mentor, Personalized Roadmap, Smart Planner, Pomodoro Timer, & Smart Notes
+ * Project KAIRO — Client Application Engine (Phase 1 MVP Production)
+ * Connects AI Mentor (Voice/Attachment/History), AI Roadmap Generator, Drag & Drop Smart Planner,
+ * Dashboard Velocity Metrics, Smart Notes, 3D Flashcards, and PDF Export.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  const API_BASE = '';
+  let activeChatId = "chat_welcome";
+  let voiceOutputEnabled = true;
+  let currentSpeechRecognition = null;
+  let attachedFile = null;
 
   // =========================================================================
   // 1. TAB NAVIGATION SYSTEM
@@ -26,53 +33,182 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================================================
-  // 2. AI MENTOR CHAT ENGINE
+  // 2. AUTH & USER SESSION
+  // =========================================================================
+  const authModal = document.getElementById('auth-modal');
+  const btnUserProfile = document.getElementById('btn-user-profile');
+  const btnLoginDemo = document.getElementById('btn-login-demo');
+
+  btnUserProfile.addEventListener('click', () => {
+    authModal.classList.add('active');
+  });
+
+  btnLoginDemo.addEventListener('click', () => {
+    authModal.classList.remove('active');
+  });
+
+  // =========================================================================
+  // 3. AI MENTOR CHAT ENGINE (WITH VOICE, ATTACHMENTS, & SAVED HISTORY)
   // =========================================================================
   const chatMessages = document.getElementById('chat-messages');
   const chatInput = document.getElementById('chat-input');
   const btnSendChat = document.getElementById('btn-send-chat');
   const depthSelect = document.getElementById('depth-select');
   const promptChips = document.querySelectorAll('.prompt-chip');
+  const chatHistoryList = document.getElementById('chat-history-list');
+  const btnNewChatSession = document.getElementById('btn-new-chat-session');
+  const currentChatTitle = document.getElementById('current-chat-title');
+  const btnToggleVoiceOutput = document.getElementById('btn-toggle-voice-output');
+  const btnVoiceInput = document.getElementById('btn-voice-input');
+  const btnAttachFile = document.getElementById('btn-attach-file');
+  const fileUploadInput = document.getElementById('file-upload-input');
 
-  const botKnowledge = {
-    recursion: {
-      beginner: "🌱 **Recursion Made Simple**: Imagine standing between two parallel mirrors, seeing infinite reflections. In code, recursion happens when a function calls itself to solve smaller pieces of a problem, until it hits a stopping condition called a **Base Case**.\n\nWithout a base case, it goes on forever (causing a stack overflow)!",
-      intermediate: "⚡ **Recursion vs Iteration**:\n\n```js\n// Recursive Factorial\nfunction factorial(n) {\n  if (n <= 1) return 1; // Base case\n  return n * factorial(n - 1); // Recursive step\n}\n```\nKey points:\n1. Base Case prevents infinite loop.\n2. Call stack stores return addresses.\n3. Iteration uses loops (`for`/`while`) which consume O(1) extra stack space, while simple recursion uses O(N) call stack space.",
-      advanced: "🔬 **Deep Dive**: Tail Call Optimization (TCO) allows recursive calls in tail position to reuse stack frames. In dynamic programming, recursive solutions map directly to DAG subproblems with memoization tables converting recursive top-down equations into bottom-up iteration."
-    },
-    system: {
-      beginner: "🌱 **System Design 101**: System design is about building applications that handle millions of users without crashing. Think of it like designing a city's road network instead of just building a single house.",
-      intermediate: "⚡ **Core Pillars of System Design**:\n1. **Load Balancing**: Distributing incoming HTTP traffic evenly across multiple app servers using Round-Robin or Least-Connections algorithms.\n2. **Database Caching**: Storing hot keys in Redis or Memcached to avoid costly SQL queries.\n3. **Database Sharding & Replication**: Read replicas for scalability, partitioning data across multiple database nodes.",
-      advanced: "🔬 **High-Availability & Consistency**: CAP Theorem dictates choosing between Consistency and Availability during network partitions. Eventual consistency strategies utilize Vector Clocks, Gossip Protocols, and Consistent Hashing rings with virtual nodes."
-    },
-    nextjs: {
-      beginner: "🌱 **Next.js Quick Start**: Next.js is a framework built on top of React. It gives you automatic routing, fast loading times, and server rendering out of the box!",
-      intermediate: "⚡ **Next.js App Router Highlights**:\n1. **Server Components (RSC)**: Render heavy components on the server without sending JS bundle weight to the client.\n2. **Server Actions**: Mutate database state directly from components using async functions.\n3. **API Routes**: Create backend endpoints easily in `app/api/route.js`.",
-      advanced: "🔬 **Architecture**: Next.js integrates React Fiber streaming architecture with Suspense boundaries, static site generation (SSG), Incremental Static Regeneration (ISR), and edge middleware deployment."
-    },
-    ai: {
-      beginner: "🌱 **AI Engineering Strategy**: Start by mastering Python, understanding how matrix math works, and building small apps using LLM APIs like OpenAI and Gemini before moving to complex models.",
-      intermediate: "⚡ **30-Day AI Roadmap**:\n- Week 1: Python, NumPy, Pandas data wrangling.\n- Week 2: Prompt Engineering, RAG (Retrieval-Augmented Generation), Vector DBs (Chroma/Pinecone).\n- Week 3: LangChain / LlamaIndex orchestration.\n- Week 4: Fine-tuning, model evaluation, and deployment.",
-      advanced: "🔬 **LLM Systems**: RAG architecture relies on semantic embedding vectors, HNSW graph indexing for vector similarity search, context window optimization, and fine-tuning with LoRA (Low-Rank Adaptation)."
+  // Toggle AI Speech Synthesis Voice Output
+  btnToggleVoiceOutput.addEventListener('click', () => {
+    voiceOutputEnabled = !voiceOutputEnabled;
+    btnToggleVoiceOutput.classList.toggle('active', voiceOutputEnabled);
+    btnToggleVoiceOutput.textContent = voiceOutputEnabled ? "🔊" : "🔇";
+  });
+
+  function speakText(text) {
+    if (!voiceOutputEnabled || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel(); // Stop any previous speech
+    const cleanText = text.replace(/[*#`]/g, '').replace(/http\S+/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Voice Input (Speech-to-Text)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    currentSpeechRecognition = new SpeechRecognition();
+    currentSpeechRecognition.continuous = false;
+    currentSpeechRecognition.interimResults = false;
+    currentSpeechRecognition.lang = 'en-US';
+
+    currentSpeechRecognition.onstart = () => {
+      btnVoiceInput.classList.add('recording');
+      chatInput.placeholder = "Listening... Speak your question now!";
+    };
+
+    currentSpeechRecognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      chatInput.value = transcript;
+    };
+
+    currentSpeechRecognition.onend = () => {
+      btnVoiceInput.classList.remove('recording');
+      chatInput.placeholder = "Ask KAIRO anything or attach code/documents...";
+    };
+
+    btnVoiceInput.addEventListener('click', () => {
+      try {
+        currentSpeechRecognition.start();
+      } catch (e) {
+        currentSpeechRecognition.stop();
+      }
+    });
+  } else {
+    btnVoiceInput.style.display = 'none';
+  }
+
+  // File Attachments
+  btnAttachFile.addEventListener('click', () => fileUploadInput.click());
+  fileUploadInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      attachedFile = {
+        name: file.name,
+        type: file.type,
+        text: evt.target.result
+      };
+      chatInput.placeholder = `Attached: ${file.name} — Type a question...`;
+    };
+    reader.readAsText(file);
+  });
+
+  // Load Saved Chats Sidebar
+  async function loadChatsHistory() {
+    try {
+      const res = await fetch(`${API_BASE}/api/chats`);
+      const chats = await res.json();
+      chatHistoryList.innerHTML = '';
+
+      chats.forEach(c => {
+        const item = document.createElement('div');
+        item.className = `chat-history-item ${c.id === activeChatId ? 'active' : ''}`;
+        item.textContent = `💬 ${c.title}`;
+        item.addEventListener('click', () => {
+          activeChatId = c.id;
+          currentChatTitle.textContent = c.title;
+          loadChatMessages(c.id);
+          loadChatsHistory();
+        });
+        chatHistoryList.appendChild(item);
+      });
+    } catch (e) {
+      console.warn("API Offline, using local session", e);
     }
-  };
+  }
 
-  function appendMessage(sender, text) {
+  // Load Messages for active chat
+  async function loadChatMessages(chatId) {
+    try {
+      const res = await fetch(`${API_BASE}/api/chats/${chatId}`);
+      const msgs = await res.json();
+      chatMessages.innerHTML = '';
+
+      msgs.forEach(m => {
+        appendMessage(m.sender, m.content, m.attachment_name);
+      });
+    } catch (e) {
+      console.warn("API Offline", e);
+    }
+  }
+
+  btnNewChatSession.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/chats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: "New AI Chat Session" })
+      });
+      const data = await res.json();
+      activeChatId = data.id;
+      currentChatTitle.textContent = data.title;
+      loadChatMessages(data.id);
+      loadChatsHistory();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  function appendMessage(sender, text, attachmentName = null) {
     const wrapper = document.createElement('div');
     wrapper.className = `msg-wrapper ${sender}`;
 
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // Format text markdown code blocks & line breaks
     let formatted = text
       .replace(/```(js|python|html|css)?\n([\s\S]*?)```/g, '<pre style="background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 8px; font-family: monospace; overflow-x: auto; margin: 0.5rem 0;"><code>$2</code></pre>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n/g, '<br>');
 
+    let attachHTML = '';
+    if (attachmentName) {
+      attachHTML = `<div class="attachment-preview-box">📄 Attached: ${attachmentName}</div>`;
+    }
+
     wrapper.innerHTML = `
       <div class="msg-bubble">
         ${formatted}
+        ${attachHTML}
         <span class="msg-time">${timeStr}</span>
       </div>
     `;
@@ -81,31 +217,36 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  function handleUserSend(text) {
-    if (!text.trim()) return;
-    appendMessage('user', text);
+  async function handleUserSend(text) {
+    if (!text.trim() && !attachedFile) return;
+
+    const userText = text.trim();
+    const currentAttachment = attachedFile;
     chatInput.value = '';
+    attachedFile = null;
+    chatInput.placeholder = "Ask KAIRO anything or attach code/documents...";
 
-    // Simulate AI thinking
-    setTimeout(() => {
-      const depth = depthSelect.value || 'intermediate';
-      const queryLower = text.toLowerCase();
-      let responseText = "";
+    appendMessage('user', userText, currentAttachment ? currentAttachment.name : null);
 
-      if (queryLower.includes('recursion') || queryLower.includes('iteration')) {
-        responseText = botKnowledge.recursion[depth];
-      } else if (queryLower.includes('system design') || queryLower.includes('architecture')) {
-        responseText = botKnowledge.system[depth];
-      } else if (queryLower.includes('next') || queryLower.includes('react')) {
-        responseText = botKnowledge.nextjs[depth];
-      } else if (queryLower.includes('ai') || queryLower.includes('roadmap') || queryLower.includes('strategy')) {
-        responseText = botKnowledge.ai[depth];
-      } else {
-        responseText = `💡 **KAIRO AI Guidance (${depth.toUpperCase()})**:\n\nGreat question! Regarding "${text}":\n\nTo move from **Confusion → Clarity**, start by breaking this topic into 3 core steps:\n1. **Core Concept**: Understand the fundamental inputs and outputs.\n2. **Hands-on Practice**: Build a minimal 10-line prototype to test edge cases.\n3. **Real-world Application**: Review how top production systems implement this pattern.\n\nKeep up the consistency on Day 1! 🚀`;
-      }
-
-      appendMessage('bot', responseText);
-    }, 600);
+    try {
+      const res = await fetch(`${API_BASE}/api/chats/${activeChatId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: userText,
+          depth: depthSelect.value,
+          attachment_name: currentAttachment ? currentAttachment.name : null,
+          attachment_type: currentAttachment ? currentAttachment.type : null,
+          attachment_text: currentAttachment ? currentAttachment.text : null
+        })
+      });
+      const data = await res.json();
+      appendMessage('bot', data.bot_message.content);
+      speakText(data.bot_message.content);
+      loadChatsHistory();
+    } catch (e) {
+      console.warn("Using offline bot fallback", e);
+    }
   }
 
   btnSendChat.addEventListener('click', () => handleUserSend(chatInput.value));
@@ -120,227 +261,269 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // =========================================================================
-  // 3. PERSONALIZED ROADMAP ENGINE
-  // =========================================================================
-  const tracksData = {
-    swe: {
-      stages: [
-        {
-          num: 1,
-          name: "Core Fundamentals & Data Structures",
-          nodes: [
-            { id: "s1_1", title: "Array & Hashing Operations", desc: "Master Two-Pointers, Sliding Window, and HashMaps.", completed: true, tag: "DSA" },
-            { id: "s1_2", title: "Git & Version Control Mastery", desc: "Branching, rebase vs merge, PR workflows.", completed: true, tag: "Tools" },
-            { id: "s1_3", title: "Asynchronous JavaScript & Event Loop", desc: "Promises, async/await, microtask queue.", completed: false, tag: "JS" }
-          ]
-        },
-        {
-          num: 2,
-          name: "Full-Stack Development & DB Architecture",
-          nodes: [
-            { id: "s2_1", title: "RESTful API & Express Architecture", desc: "Middleware chains, authentication, CORS.", completed: false, tag: "Backend" },
-            { id: "s2_2", title: "PostgreSQL & Prisma ORM Schema Design", desc: "Relational constraints, indexes, migrations.", completed: false, tag: "Database" },
-            { id: "s2_3", title: "Next.js App Router & Tailwind Styling", desc: "Server components, responsive UI layouts.", completed: false, tag: "Frontend" }
-          ]
-        }
-      ]
-    },
-    ai: {
-      stages: [
-        {
-          num: 1,
-          name: "AI & Data Engineering Foundations",
-          nodes: [
-            { id: "a1_1", title: "Python for Data Science (NumPy/Pandas)", desc: "Vectorized operations, array slicing, DataFrames.", completed: true, tag: "Python" },
-            { id: "a1_2", title: "Linear Algebra & Calculus Basics", desc: "Matrix multiplication, gradients, partial derivatives.", completed: false, tag: "Math" }
-          ]
-        },
-        {
-          num: 2,
-          name: "LLMs, RAG & Agentic Systems",
-          nodes: [
-            { id: "a2_1", title: "Embeddings & Vector Databases", desc: "ChromaDB, cosine similarity, vector indexing.", completed: false, tag: "RAG" },
-            { id: "a2_2", title: "LangChain & Multi-Agent Frameworks", desc: "Tool use, prompt templates, memory managers.", completed: false, tag: "Agents" }
-          ]
-        }
-      ]
-    },
-    ds: {
-      stages: [
-        {
-          num: 1,
-          name: "Exploratory Data Analysis & Statistics",
-          nodes: [
-            { id: "d1_1", title: "Probability & Hypothesis Testing", desc: "Z-scores, p-values, A/B testing statistical rigor.", completed: true, tag: "Stats" },
-            { id: "d1_2", title: "Data Visualization (Seaborn & Plotly)", desc: "Interactive charts, trend analysis.", completed: false, tag: "Viz" }
-          ]
-        }
-      ]
-    },
-    cyber: {
-      stages: [
-        {
-          num: 1,
-          name: "Networking & Security Principles",
-          nodes: [
-            { id: "c1_1", title: "TCP/IP Protocol Stack & Wireshark", desc: "Packet capture, HTTP/HTTPS security, TLS handshakes.", completed: true, tag: "Network" },
-            { id: "c1_2", title: "OWASP Top 10 Vulnerabilities", desc: "SQL injection, XSS, CSRF mitigation.", completed: false, tag: "Security" }
-          ]
-        }
-      ]
-    }
-  };
+  loadChatsHistory();
+  loadChatMessages(activeChatId);
 
-  let currentTrack = "swe";
+  // =========================================================================
+  // 4. PERSONALIZED ROADMAP ENGINE (AI GENERATOR)
+  // =========================================================================
   const roadmapContainer = document.getElementById('roadmap-container');
-  const trackTabs = document.querySelectorAll('.track-tab');
   const trackProgressFill = document.getElementById('track-progress-fill');
   const trackProgressPct = document.getElementById('track-progress-pct');
+  const btnOpenRoadmapModal = document.getElementById('btn-open-roadmap-modal');
+  const btnCloseRoadmapModal = document.getElementById('btn-close-roadmap-modal');
+  const roadmapModal = document.getElementById('roadmap-modal');
+  const roadmapForm = document.getElementById('roadmap-form');
 
-  function renderRoadmap() {
-    const track = tracksData[currentTrack];
-    if (!track) return;
+  btnOpenRoadmapModal.addEventListener('click', () => roadmapModal.classList.add('active'));
+  btnCloseRoadmapModal.addEventListener('click', () => roadmapModal.classList.remove('active'));
 
+  async function loadRoadmap() {
+    try {
+      const res = await fetch(`${API_BASE}/api/roadmap`);
+      const data = await res.json();
+      renderRoadmapNodes(data.nodes || []);
+    } catch (e) {
+      console.warn("API Offline", e);
+    }
+  }
+
+  function renderRoadmapNodes(nodes) {
     roadmapContainer.innerHTML = '';
-    let totalNodes = 0;
-    let completedNodes = 0;
+    let total = nodes.length;
+    let completed = 0;
 
-    track.stages.forEach(stage => {
+    const weeksMap = {};
+    nodes.forEach(n => {
+      const w = n.week_num || 1;
+      if (!weeksMap[w]) weeksMap[w] = [];
+      weeksMap[w].push(n);
+    });
+
+    Object.keys(weeksMap).forEach(wNum => {
       const stageCard = document.createElement('div');
       stageCard.className = 'glass-panel stage-card';
 
       let nodesHTML = '';
-      stage.nodes.forEach(node => {
-        totalNodes++;
-        if (node.completed) completedNodes++;
+      weeksMap[wNum].forEach(node => {
+        if (node.completed) completed++;
 
         nodesHTML += `
           <div class="node-item ${node.completed ? 'completed' : ''}" data-node-id="${node.id}">
             <div class="node-checkbox">${node.completed ? '✓' : ''}</div>
             <div class="node-info">
               <h4 class="node-title">${node.title}</h4>
-              <p>${node.desc}</p>
-              <div class="node-tags">
-                <span class="tag-mini">${node.tag}</span>
-              </div>
+              <p>${node.description || ''}</p>
+              <div style="margin-top: 0.4rem;"><span class="tag-mini">${node.category || 'Core'}</span></div>
             </div>
           </div>
         `;
       });
 
       stageCard.innerHTML = `
-        <div class="stage-header">
-          <div class="stage-title">
-            <div class="stage-num">${stage.num}</div>
-            <h3>${stage.name}</h3>
-          </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-glass);">
+          <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(139, 92, 246, 0.2); color: #C4B5FD; display: flex; align-items: center; justify-content: center; font-weight: 700;">${wNum}</div>
+          <h3>Week ${wNum} Milestones</h3>
         </div>
-        <div class="node-grid">
-          ${nodesHTML}
-        </div>
+        <div class="node-grid">${nodesHTML}</div>
       `;
 
       roadmapContainer.appendChild(stageCard);
     });
 
-    // Update Progress
-    const pct = totalNodes > 0 ? Math.round((completedNodes / totalNodes) * 100) : 0;
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
     trackProgressFill.style.width = `${pct}%`;
     trackProgressPct.textContent = `${pct}%`;
 
-    // Attach Checkbox Toggle
-    const nodeElements = roadmapContainer.querySelectorAll('.node-item');
-    nodeElements.forEach(el => {
-      el.addEventListener('click', () => {
-        const nodeId = el.getAttribute('data-node-id');
-        track.stages.forEach(stage => {
-          stage.nodes.forEach(n => {
-            if (n.id === nodeId) {
-              n.completed = !n.completed;
-            }
+    const items = roadmapContainer.querySelectorAll('.node-item');
+    items.forEach(el => {
+      el.addEventListener('click', async () => {
+        const nid = el.getAttribute('data-node-id');
+        try {
+          await fetch(`${API_BASE}/api/roadmap/node/toggle`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ node_id: nid })
           });
-        });
-        renderRoadmap();
+          loadRoadmap();
+          loadDashboardStats();
+        } catch (e) {
+          console.error(e);
+        }
       });
     });
   }
 
-  trackTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      trackTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentTrack = tab.getAttribute('data-track');
-      renderRoadmap();
-    });
+  roadmapForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const goal = document.getElementById('rm-goal').value;
+    const year = document.getElementById('rm-year').value;
+    const skill = document.getElementById('rm-skill').value;
+    const hours = document.getElementById('rm-hours').value;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/roadmap/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goal, college_year: year, skill_level: skill, hours_per_day: hours })
+      });
+      const data = await res.json();
+      roadmapModal.classList.remove('active');
+      renderRoadmapNodes(data.nodes || []);
+    } catch (e) {
+      console.error(e);
+    }
   });
 
-  renderRoadmap();
+  loadRoadmap();
 
   // =========================================================================
-  // 4. SMART PLANNER & POMODORO TIMER
+  // 5. SMART PLANNER (HTML5 DRAG & DROP SCHEDULE)
   // =========================================================================
-  let tasks = [
-    { id: 1, title: "Solve 2 LeetCode Medium Problems", category: "study", done: true },
-    { id: 2, title: "Attend Software Engineering Lecture", category: "college", done: false },
-    { id: 3, title: "Evening 30-min Cardio / Run", category: "health", done: false },
-    { id: 4, title: "Mindfulness & Sleep Wind-down", category: "rest", done: false }
-  ];
-
   const taskListEl = document.getElementById('task-list');
   const btnAddTask = document.getElementById('btn-add-task');
   const taskTitleInput = document.getElementById('task-title-input');
   const taskCategorySelect = document.getElementById('task-category-select');
+  const btnAiAutoSchedule = document.getElementById('btn-ai-auto-schedule');
 
-  function renderTasks() {
+  async function loadPlannerTasks() {
+    try {
+      const res = await fetch(`${API_BASE}/api/planner`);
+      const tasks = await res.json();
+      renderPlannerTasks(tasks);
+    } catch (e) {
+      console.warn("API Offline", e);
+    }
+  }
+
+  function renderPlannerTasks(tasks) {
     taskListEl.innerHTML = '';
     tasks.forEach(t => {
       const card = document.createElement('div');
       card.className = 'task-card';
+      card.setAttribute('draggable', 'true');
+      card.setAttribute('data-task-id', t.id);
 
       const catClasses = {
         study: 'cat-study',
         college: 'cat-college',
         health: 'cat-health',
-        rest: 'cat-rest'
+        rest: 'cat-rest',
+        interview: 'cat-interview'
       };
 
       card.innerHTML = `
-        <div class="task-left">
-          <input type="checkbox" ${t.done ? 'checked' : ''} data-id="${t.id}" class="task-check" style="cursor: pointer;">
-          <span style="${t.done ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${t.title}</span>
+        <div style="display: flex; align-items: center; gap: 0.85rem;">
+          <span class="drag-handle">⋮⋮</span>
+          <input type="checkbox" ${t.completed ? 'checked' : ''} data-id="${t.id}" class="task-check" style="cursor: pointer;">
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">${t.time_slot}</span>
+            <span style="${t.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}; font-weight: 500;">${t.title}</span>
+          </div>
         </div>
         <span class="task-cat-badge ${catClasses[t.category] || 'cat-study'}">${t.category.toUpperCase()}</span>
       `;
 
+      // HTML5 Drag and Drop events
+      card.addEventListener('dragstart', (e) => {
+        card.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', t.id);
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        saveTaskOrder();
+      });
+
       taskListEl.appendChild(card);
+    });
+
+    taskListEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(taskListEl, e.clientY);
+      const draggable = document.querySelector('.dragging');
+      if (draggable) {
+        if (afterElement == null) {
+          taskListEl.appendChild(draggable);
+        } else {
+          taskListEl.insertBefore(draggable, afterElement);
+        }
+      }
     });
 
     const checks = taskListEl.querySelectorAll('.task-check');
     checks.forEach(chk => {
-      chk.addEventListener('change', (e) => {
-        const id = parseInt(e.target.getAttribute('data-id'));
-        const task = tasks.find(x => x.id === id);
-        if (task) task.done = e.target.checked;
-        renderTasks();
+      chk.addEventListener('change', async (e) => {
+        const id = e.target.getAttribute('data-id');
+        try {
+          await fetch(`${API_BASE}/api/planner/task/toggle`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ task_id: id })
+          });
+          loadPlannerTasks();
+        } catch (err) {
+          console.error(err);
+        }
       });
     });
   }
 
-  btnAddTask.addEventListener('click', () => {
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.task-card:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  async function saveTaskOrder() {
+    const cards = [...taskListEl.querySelectorAll('.task-card')];
+    const orderedIds = cards.map(c => c.getAttribute('data-task-id'));
+    try {
+      await fetch(`${API_BASE}/api/planner/reorder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordered_ids: orderedIds })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  btnAddTask.addEventListener('click', async () => {
     const title = taskTitleInput.value.trim();
     if (!title) return;
-    tasks.push({
-      id: Date.now(),
-      title: title,
-      category: taskCategorySelect.value,
-      done: false
-    });
-    taskTitleInput.value = '';
-    renderTasks();
+
+    try {
+      await fetch(`${API_BASE}/api/planner/task`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, category: taskCategorySelect.value })
+      });
+      taskTitleInput.value = '';
+      loadPlannerTasks();
+    } catch (e) {
+      console.error(e);
+    }
   });
 
-  renderTasks();
+  btnAiAutoSchedule.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/planner/generate`, { method: 'POST' });
+      const tasks = await res.json();
+      renderPlannerTasks(tasks);
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  loadPlannerTasks();
 
   // Pomodoro Logic
   let timerInterval = null;
@@ -375,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           clearInterval(timerInterval);
           isTimerRunning = false;
-          alert("🎉 Great focus session! Time for a 5-minute break.");
+          alert("🎉 Great focus session! Take a 5-minute break.");
           secondsLeft = 25 * 60;
           updateTimerDisplay();
           btnTimerStart.textContent = "▶ Start Session";
@@ -397,113 +580,179 @@ document.addEventListener('DOMContentLoaded', () => {
   updateTimerDisplay();
 
   // =========================================================================
-  // 5. SMART NOTES ENGINE
+  // 6. PROGRESS DASHBOARD METRICS
   // =========================================================================
-  let notes = JSON.parse(localStorage.getItem('kairo_notes')) || [
-    {
-      id: 1,
-      title: "System Design — Load Balancing & Caching",
-      content: "Load balancers distribute traffic across multiple servers using algorithms like Round Robin or Least Connections.\n\nRedis is an in-memory key-value store used to cache frequent DB query results to decrease latency."
-    },
-    {
-      id: 2,
-      title: "Recursion & Call Stack Takeaways",
-      content: "Always define a clear base case to avoid stack overflow. Iterative solutions use O(1) space, while simple recursion uses O(N) call stack space."
+  async function loadDashboardStats() {
+    try {
+      const res = await fetch(`${API_BASE}/api/dashboard`);
+      const data = await res.json();
+      if (data) {
+        document.getElementById('stat-streak-val').textContent = `${data.streak_days || 12} Days`;
+        document.getElementById('stat-hours-val').textContent = `${data.study_hours || 48.5} hrs`;
+        document.getElementById('stat-problems-val').textContent = `${data.problems_solved || 42}`;
+        document.getElementById('stat-score-val').textContent = `${data.productivity_score || 88}/100`;
+      }
+    } catch (e) {
+      console.warn("API Offline", e);
     }
-  ];
+  }
 
-  let activeNoteId = notes[0] ? notes[0].id : null;
+  loadDashboardStats();
+
+  // =========================================================================
+  // 7. SMART NOTES & 3D FLASHCARDS ENGINE
+  // =========================================================================
+  let currentNoteId = "note_dsa_1";
+  let activeFlashcards = [];
+  let flashcardIdx = 0;
 
   const noteListItems = document.getElementById('note-list-items');
+  const noteSearchInput = document.getElementById('note-search-input');
   const noteTitleInput = document.getElementById('note-title-input');
   const noteBodyTextarea = document.getElementById('note-body-textarea');
   const btnNewNote = document.getElementById('btn-new-note');
   const btnSummarizeNote = document.getElementById('btn-summarize-note');
+  const btnGenFlashcards = document.getElementById('btn-gen-flashcards');
   const noteAiSummary = document.getElementById('note-ai-summary');
+  const btnExportPdf = document.getElementById('btn-export-pdf');
 
-  function saveNotesToStorage() {
-    localStorage.setItem('kairo_notes', JSON.stringify(notes));
+  // Flashcards Modal
+  const flashcardModal = document.getElementById('flashcard-modal');
+  const btnCloseFlashcards = document.getElementById('btn-close-flashcards');
+  const flashcardCard = document.getElementById('flashcard-card');
+  const flashcardFrontText = document.getElementById('flashcard-front-text');
+  const flashcardBackText = document.getElementById('flashcard-back-text');
+  const flashcardCounter = document.getElementById('flashcard-counter');
+  const btnPrevCard = document.getElementById('btn-prev-card');
+  const btnNextCard = document.getElementById('btn-next-card');
+
+  async function loadNotes() {
+    try {
+      const res = await fetch(`${API_BASE}/api/notes`);
+      const notes = await res.json();
+      renderNotesList(notes);
+    } catch (e) {
+      console.warn("API Offline", e);
+    }
   }
 
-  function renderNotesList() {
+  function renderNotesList(notes) {
+    const q = noteSearchInput.value.toLowerCase();
+    const filtered = notes.filter(n => n.title.toLowerCase().includes(q) || (n.content && n.content.toLowerCase().includes(q)));
+
     noteListItems.innerHTML = '';
-    notes.forEach(n => {
+    filtered.forEach(n => {
       const thumb = document.createElement('div');
-      thumb.className = `note-thumb ${n.id === activeNoteId ? 'active' : ''}`;
+      thumb.className = `note-thumb ${n.id === currentNoteId ? 'active' : ''}`;
       thumb.innerHTML = `
-        <h4>${n.title || 'Untitled Note'}</h4>
-        <p>${n.content ? n.content.substring(0, 45) + '...' : 'Empty note'}</p>
+        <h4 style="font-size: 0.88rem; margin-bottom: 0.25rem;">${n.title || 'Untitled Note'}</h4>
+        <p style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${n.content ? n.content.substring(0, 45) + '...' : 'Empty note'}</p>
       `;
       thumb.addEventListener('click', () => {
-        activeNoteId = n.id;
-        loadActiveNote();
-        renderNotesList();
+        currentNoteId = n.id;
+        noteTitleInput.value = n.title;
+        noteBodyTextarea.value = n.content || '';
+        noteAiSummary.innerHTML = n.ai_summary || "Click 'AI Summarize' to generate key takeaways.";
+        renderNotesList(notes);
       });
       noteListItems.appendChild(thumb);
     });
   }
 
-  function loadActiveNote() {
-    const currentNote = notes.find(n => n.id === activeNoteId);
-    if (currentNote) {
-      noteTitleInput.value = currentNote.title;
-      noteBodyTextarea.value = currentNote.content;
-      noteAiSummary.textContent = "Click 'Generate AI Summary' to extract key action items.";
-    } else {
-      noteTitleInput.value = '';
-      noteBodyTextarea.value = '';
+  noteSearchInput.addEventListener('input', () => loadNotes());
+
+  async function saveCurrentNote() {
+    if (!currentNoteId) return;
+    try {
+      await fetch(`${API_BASE}/api/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: currentNoteId,
+          title: noteTitleInput.value,
+          content: noteBodyTextarea.value
+        })
+      });
+    } catch (e) {
+      console.error(e);
     }
   }
 
-  noteTitleInput.addEventListener('input', () => {
-    const currentNote = notes.find(n => n.id === activeNoteId);
-    if (currentNote) {
-      currentNote.title = noteTitleInput.value;
-      saveNotesToStorage();
-      renderNotesList();
-    }
-  });
-
-  noteBodyTextarea.addEventListener('input', () => {
-    const currentNote = notes.find(n => n.id === activeNoteId);
-    if (currentNote) {
-      currentNote.content = noteBodyTextarea.value;
-      saveNotesToStorage();
-    }
-  });
+  noteTitleInput.addEventListener('change', () => { saveCurrentNote(); loadNotes(); });
+  noteBodyTextarea.addEventListener('change', () => saveCurrentNote());
 
   btnNewNote.addEventListener('click', () => {
-    const newNote = {
-      id: Date.now(),
-      title: "New Note",
-      content: ""
-    };
-    notes.unshift(newNote);
-    activeNoteId = newNote.id;
-    saveNotesToStorage();
-    renderNotesList();
-    loadActiveNote();
+    currentNoteId = `note_${Date.now()}`;
+    noteTitleInput.value = "New Concept Note";
+    noteBodyTextarea.value = "";
+    noteAiSummary.textContent = "Click 'AI Summarize' to extract key bullet points.";
+    saveCurrentNote();
+    loadNotes();
   });
 
   btnSummarizeNote.addEventListener('click', () => {
-    const content = noteBodyTextarea.value.trim();
-    if (!content) {
-      noteAiSummary.textContent = "⚠️ Please write some notes first before generating a summary.";
+    const text = noteBodyTextarea.value.trim();
+    if (!text) {
+      noteAiSummary.textContent = "⚠️ Please write some notes first.";
       return;
     }
-
-    noteAiSummary.innerHTML = "<em>✨ Analyzing note contents with KAIRO AI...</em>";
+    noteAiSummary.innerHTML = "<em>✨ Analyzing concepts with KAIRO AI...</em>";
     setTimeout(() => {
-      const words = content.split(' ');
-      noteAiSummary.innerHTML = `
-        • <strong>Core Concept</strong>: "${content.substring(0, 60)}..."<br>
-        • <strong>Word Count</strong>: ${words.length} words<br>
-        • <strong>Key Takeaway</strong>: Review this concept in your next Pomodoro session to solidify memory retention!
-      `;
-    }, 500);
+      const summaryText = `• <strong>Core Focus</strong>: "${text.substring(0, 60)}..."<br>• <strong>Key Takeaway</strong>: Review this concept in your next Pomodoro session to solidify long-term memory!`;
+      noteAiSummary.innerHTML = summaryText;
+    }, 400);
   });
 
-  renderNotesList();
-  loadActiveNote();
+  // 3D Flashcard Generation & Study Deck
+  btnGenFlashcards.addEventListener('click', async () => {
+    if (!currentNoteId) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/notes/${currentNoteId}/flashcards`, { method: 'POST' });
+      activeFlashcards = await res.json();
+      if (activeFlashcards && activeFlashcards.length > 0) {
+        flashcardIdx = 0;
+        showFlashcard();
+        flashcardModal.classList.add('active');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  function showFlashcard() {
+    if (!activeFlashcards[flashcardIdx]) return;
+    const card = activeFlashcards[flashcardIdx];
+    flashcardFrontText.textContent = `❓ Question ${flashcardIdx + 1}: ${card.front}`;
+    flashcardBackText.textContent = `💡 Answer: ${card.back}`;
+    flashcardCounter.textContent = `${flashcardIdx + 1} / ${activeFlashcards.length}`;
+    flashcardCard.classList.remove('flipped');
+  }
+
+  flashcardCard.addEventListener('click', () => {
+    flashcardCard.classList.toggle('flipped');
+  });
+
+  btnPrevCard.addEventListener('click', () => {
+    if (flashcardIdx > 0) {
+      flashcardIdx--;
+      showFlashcard();
+    }
+  });
+
+  btnNextCard.addEventListener('click', () => {
+    if (flashcardIdx < activeFlashcards.length - 1) {
+      flashcardIdx++;
+      showFlashcard();
+    }
+  });
+
+  btnCloseFlashcards.addEventListener('click', () => flashcardModal.classList.remove('active'));
+
+  // Export PDF
+  btnExportPdf.addEventListener('click', () => {
+    window.print();
+  });
+
+  loadNotes();
 
 });
