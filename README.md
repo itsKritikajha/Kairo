@@ -26,69 +26,53 @@ Helping every learner move from:
 
 ---
 
-# Core Features
+# Official Technical Documentation
 
-## AI Mentor
-Personal AI tutor that explains concepts from beginner to advanced.
+📖 **Software Requirements Specification (SRS)**:  
+Read the full startup architectural blueprint, database schema (18 tables), screen inventory, API endpoints matrix, and AI workflows in [`docs/SRS.md`](file:///c:/Kairo/docs/SRS.md).
 
-## Personalized Roadmap
-Daily learning roadmap based on career goals.
+---
 
-## Smart Planner
-AI-generated schedules balancing study, college, health and rest.
+# Core Features (Phase 1 MVP)
 
-## Communication Coach
-Improve English speaking, public speaking and interview skills.
+## 🤖 AI Mentor
+Personal AI tutor that explains concepts from beginner to advanced, featuring voice input/output, file attachments, and saved chat history.
 
-## Placement Preparation
-Roadmaps for placements, internships and technical interviews.
+## 🎯 Personalized Roadmap
+Daily learning roadmap customized based on user goal, college year, skill level, and available study hours.
 
-## Progress Dashboard
-Track learning streaks and weekly improvements.
+## ⏰ Smart Planner
+AI-generated daily schedule balancing study, college, health, and rest with HTML5 Drag-and-Drop editing and Focus Pomodoro Timer.
 
-## Study Buddy
-Find students with similar goals and study together.
+## 📊 Progress Dashboard
+Track learning streaks, study hours velocity, problems solved, and productivity scores.
 
-## Community
-Peer learning and mentorship.
-
-## AI Voice Assistant
-Talk naturally with KAIRO.
-
-## Career Guidance
-Roadmaps for Software, AI, Data Science, Cyber Security and more.
+## 📝 Smart Notes & 3D Flashcards
+Write concept notes, extract AI takeaways, convert to 3D interactive flashcards, and export PDF.
 
 ---
 
 # Tech Stack
 
 Frontend
-- React
-- Next.js
-- Tailwind CSS
+- React 19 / Next.js 15
+- Tailwind CSS / Shadcn UI
 
 Backend
-- Node.js
-- Express
-
-Database
-- PostgreSQL
-- Prisma ORM
+- Node.js / Express
+- PostgreSQL / Prisma ORM
 
 Authentication
-- Clerk / Firebase
+- Clerk
 
 AI
-- OpenAI
-- Gemini
-- LangChain
+- OpenAI GPT-4o / Gemini 1.5 Pro / LangChain
 
 Storage
 - Supabase
 
 Deployment
-- Vercel
-- Railway
+- Vercel / Railway
 
 ---
 
