@@ -1,0 +1,91 @@
+// database/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // For Supabase integration
+}
+
+model User {
+  id             String    @id @default(uuid())
+  clerkId        String    @unique
+  email          String    @unique
+  name           String
+  college        String?
+  graduationYear Int?
+  dreamCompany   String?
+  skills         String[]  @default([])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  roadmaps       Roadmap[]
+  chats          Chat[]
+  tasks          Task[]
+}
+
+model Roadmap {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  targetGoal  String
+  progress    Float    @default(0.0) // Percentage 0-100
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nodes       RoadmapNode[]
+}
+
+model RoadmapNode {
+  id          String   @id @default(uuid())
+  roadmapId   String
+  weekNumber  Int
+  dayNumber   Int
+  title       String
+  isCompleted Boolean  @default(false)
+  
+  roadmap     Roadmap  @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  userId      String
+  timeSlot    String
+  title       String
+  category    String   @default("study")
+  orderIndex  Int      @default(0)
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  userId    String
+  title     String
+  createdAt DateTime  @default(now())
+  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  role      Role     @default(USER)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  AI
+  SYSTEM
+}
