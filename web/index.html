@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAIRO — From Potential to Progress</title>
+  <meta name="description" content="KAIRO is an AI-powered student growth platform that transforms confusion into clarity through personalized learning, career guidance, communication coaching, accountability, and community.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand-motto">
+        <h2>Project KAIRO</h2>
+        <span class="tagline-pill">From Potential to Progress</span>
+      </div>
+
+      <div class="header-actions">
+        <div class="streak-badge">
+          <span class="streak-icon">🔥</span>
+          <span id="streak-count">12 Day Streak</span>
+        </div>
+
+        <div class="founder-pill">
+          <span>Founder: <strong>Kritika Jha</strong></span>
+        </div>
+
+        <div class="avatar-circle" title="Student Learner Profile">KJ</div>
+      </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div>
+        <div class="logo-box">
+          <div class="logo-icon">🚀</div>
+          <div class="logo-text">
+            <h1>KAIRO</h1>
+            <span>AI Growth Companion</span>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <div class="nav-item active" data-tab="ai-mentor">
+            <span class="icon">🤖</span>
+            <span>AI Mentor</span>
+          </div>
+
+          <div class="nav-item" data-tab="roadmap">
+            <span class="icon">🎯</span>
+            <span>Personalized Roadmap</span>
+          </div>
+
+          <div class="nav-item" data-tab="planner">
+            <span class="icon">⏰</span>
+            <span>Smart Planner</span>
+          </div>
+
+          <div class="nav-item" data-tab="dashboard">
+            <span class="icon">📊</span>
+            <span>Progress Dashboard</span>
+          </div>
+
+          <div class="nav-item" data-tab="notes">
+            <span class="icon">📝</span>
+            <span>Smart Notes</span>
+          </div>
+
+          <div class="nav-item" style="opacity: 0.6; cursor: not-allowed;">
+            <span class="icon">🗣️</span>
+            <span>Comm Coach</span>
+            <span class="badge-v2">v2</span>
+          </div>
+
+          <div class="nav-item" style="opacity: 0.6; cursor: not-allowed;">
+            <span class="icon">👥</span>
+            <span>Study Buddy</span>
+            <span class="badge-v2">v2</span>
+          </div>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="vision-card">
+          <p><strong>Confusion</strong> → Clarity</p>
+          <p><strong>Fear</strong> → Confidence</p>
+          <p><strong>Potential</strong> → Progress</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="main-content">
+
+      <!-- ===================================================================
+           TAB 1: AI MENTOR CHAT
+           =================================================================== -->
+      <section id="ai-mentor" class="tab-pane active">
+        <div class="page-title-box">
+          <h2>🤖 AI Mentor</h2>
+          <p>Your 24/7 personal tutor explaining complex concepts from beginner to advanced levels.</p>
+        </div>
+
+        <div class="chat-container">
+          <div class="chat-toolbar">
+            <div class="mentor-profile">
+              <div class="mentor-avatar">🧠</div>
+              <div class="mentor-info">
+                <h3>KAIRO Tutor AI</h3>
+                <span><span class="dot-online"></span> Active • Ready to clarify</span>
+              </div>
+            </div>
+
+            <div class="mode-selector">
+              <label for="depth-select">Depth Level:</label>
+              <select id="depth-select" class="select-custom">
+                <option value="beginner">🌱 Beginner (ELIF5)</option>
+                <option value="intermediate" selected>⚡ Intermediate (Practical Code)</option>
+                <option value="advanced">🔬 Deep Dive (Architecture & Math)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chat-messages">
+            <!-- Initial Bot Welcome -->
+            <div class="msg-wrapper bot">
+              <div class="msg-bubble">
+                Hello Kritika! 👋 I am your KAIRO AI Mentor. What topic would you like to master today? 
+                Whether you want to unpack Data Structures, System Design, AI Algorithms, or refine your placement prep, I'm here to break it down!
+                <span class="msg-time">Just now</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-prompts">
+            <button class="prompt-chip" data-prompt="Explain Recursion vs Iteration with code examples">💡 Recursion vs Iteration</button>
+            <button class="prompt-chip" data-prompt="What are the top 3 concepts for System Design interviews?">📐 System Design 101</button>
+            <button class="prompt-chip" data-prompt="How do I prepare for a React + Next.js technical round?">⚡ Next.js Interview Tips</button>
+            <button class="prompt-chip" data-prompt="Give me a 30-day AI Engineering study strategy">🤖 AI Study Strategy</button>
+          </div>
+
+          <div class="chat-input-bar">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Ask KAIRO anything (e.g., 'How does gradient descent work?')..." autocomplete="off">
+            <button id="btn-send-chat" class="btn-send">
+              <span>Send</span> ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 2: PERSONALIZED ROADMAP
+           =================================================================== -->
+      <section id="roadmap" class="tab-pane">
+        <div class="page-title-box">
+          <h2>🎯 Personalized Learning Roadmap</h2>
+          <p>Step-by-step career acceleration tracks curated for software, AI, and security engineering.</p>
+        </div>
+
+        <div class="roadmap-controls">
+          <div class="track-tabs" id="track-tabs">
+            <button class="track-tab active" data-track="swe">💻 Software Engineer</button>
+            <button class="track-tab" data-track="ai">🤖 AI & ML Specialist</button>
+            <button class="track-tab" data-track="ds">📊 Data Science</button>
+            <button class="track-tab" data-track="cyber">🛡️ Cyber Security</button>
+          </div>
+
+          <div class="overall-progress">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Track Progress:</span>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="track-progress-fill"></div>
+            </div>
+            <span id="track-progress-pct" style="font-weight: 700; font-size: 0.9rem;">35%</span>
+          </div>
+        </div>
+
+        <div class="roadmap-timeline" id="roadmap-container">
+          <!-- Dynamic Content Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 3: SMART PLANNER
+           =================================================================== -->
+      <section id="planner" class="tab-pane">
+        <div class="page-title-box">
+          <h2>⏰ Smart Planner & Focus Timer</h2>
+          <p>Balance study, college commitments, health, and rest with AI load balancing.</p>
+        </div>
+
+        <div class="planner-grid">
+          <div class="planner-tasks-panel glass-panel">
+            <h3>Today's Target Schedule</h3>
+            
+            <div class="task-form-box">
+              <input type="text" id="task-title-input" class="task-input" placeholder="Add a focus task (e.g., 'Solve 2 LeetCode Mediums')...">
+              <select id="task-category-select" class="category-select">
+                <option value="study">📚 Study</option>
+                <option value="college">🏫 College</option>
+                <option value="health">🏋️ Health</option>
+                <option value="rest">🧘 Rest</option>
+              </select>
+              <button id="btn-add-task" class="btn-add-task">+ Add</button>
+            </div>
+
+            <div class="task-list" id="task-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Pomodoro Timer Box -->
+          <div class="glass-panel pomodoro-card">
+            <h3>🍅 Focus Pomodoro</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">25-minute deep focus sessions</p>
+
+            <div class="timer-circle" id="timer-circle">
+              <div class="timer-inner">
+                <span class="timer-display" id="timer-display">25:00</span>
+                <span id="timer-status" style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600;">READY</span>
+              </div>
+            </div>
+
+            <div class="timer-controls">
+              <button id="btn-timer-start" class="btn-timer primary">▶ Start Session</button>
+              <button id="btn-timer-reset" class="btn-timer">↺ Reset</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 4: PROGRESS DASHBOARD
+           =================================================================== -->
+      <section id="dashboard" class="tab-pane">
+        <div class="page-title-box">
+          <h2>📊 Growth & Velocity Dashboard</h2>
+          <p>Track your real-time consistency, weekly velocity, and skill acquisition.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="glass-panel stat-card">
+            <div class="stat-icon-box icon-purple">🔥</div>
+            <div class="stat-info">
+              <h3>Active Streak</h3>
+              <div class="stat-val">12 Days</div>
+            </div>
+          </div>
+
+          <div class="glass-panel stat-card">
+            <div class="stat-icon-box icon-cyan">📈</div>
+            <div class="stat-info">
+              <h3>Weekly Velocity</h3>
+              <div class="stat-val">+34%</div>
+            </div>
+          </div>
+
+          <div class="glass-panel stat-card">
+            <div class="stat-icon-box icon-emerald">⏱️</div>
+            <div class="stat-info">
+              <h3>Hours Focused</h3>
+              <div class="stat-val">48.5 hrs</div>
+            </div>
+          </div>
+
+          <div class="glass-panel stat-card">
+            <div class="stat-icon-box icon-amber">🎓</div>
+            <div class="stat-info">
+              <h3>Mastery Index</h3>
+              <div class="stat-val">87%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-details">
+          <div class="glass-panel">
+            <h3>Weekly Focus Hours</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Daily distribution across the current week</p>
+            <div class="weekly-bars">
+              <div class="bar-col"><div class="bar-fill" style="height: 65%;"></div><span class="bar-day">Mon</span></div>
+              <div class="bar-col"><div class="bar-fill" style="height: 80%;"></div><span class="bar-day">Tue</span></div>
+              <div class="bar-col"><div class="bar-fill" style="height: 45%;"></div><span class="bar-day">Wed</span></div>
+              <div class="bar-col"><div class="bar-fill" style="height: 90%;"></div><span class="bar-day">Thu</span></div>
+              <div class="bar-col"><div class="bar-fill" style="height: 100%;"></div><span class="bar-day">Fri</span></div>
+              <div class="bar-col"><div class="bar-fill" style="height: 70%;"></div><span class="bar-day">Sat</span></div>
+              <div class="bar-col"><div class="bar-fill" style="height: 30%;"></div><span class="bar-day">Sun</span></div>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <h3>Unlocked Mastery Badges</h3>
+            <div class="badge-grid">
+              <div class="badge-item">
+                <span class="badge-icon">⚡</span>
+                <div>
+                  <h4>Consistency Queen</h4>
+                  <p>Maintained 10+ day streak</p>
+                </div>
+              </div>
+
+              <div class="badge-item">
+                <span class="badge-icon">🧮</span>
+                <div>
+                  <h4>Algo Explorer</h4>
+                  <p>Completed 25 LeetCode problems</p>
+                </div>
+              </div>
+
+              <div class="badge-item">
+                <span class="badge-icon">🚀</span>
+                <div>
+                  <h4>Project Crusher</h4>
+                  <p>Built 1 full-stack app</p>
+                </div>
+              </div>
+
+              <div class="badge-item">
+                <span class="badge-icon">🎯</span>
+                <div>
+                  <h4>Focus Master</h4>
+                  <p>Completed 15 Pomodoro sessions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 5: SMART NOTES
+           =================================================================== -->
+      <section id="notes" class="tab-pane">
+        <div class="page-title-box">
+          <h2>📝 Smart Notes & Knowledge Base</h2>
+          <p>Capture key takeaways and let KAIRO AI auto-summarize core concepts.</p>
+        </div>
+
+        <div class="notes-layout">
+          <div class="notes-sidebar">
+            <button id="btn-new-note" class="btn-new-note">
+              <span>+ New Note</span>
+            </button>
+            <div class="note-list-items" id="note-list-items">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div class="note-editor-panel glass-panel">
+            <input type="text" id="note-title-input" class="note-title-input" placeholder="Note Title...">
+            <textarea id="note-body-textarea" class="note-body-textarea" placeholder="Start typing your concepts, code snippets, or interview questions here..."></textarea>
+            
+            <div class="note-summary-box">
+              <h5>✨ KAIRO AI Takeaways Summary</h5>
+              <p id="note-ai-summary" style="font-size: 0.82rem; color: var(--text-muted);">Click 'Summarize' to extract key action items and core formulas.</p>
+              <button id="btn-summarize-note" class="btn-timer" style="margin-top: 0.75rem; font-size: 0.78rem;">✨ Generate AI Summary</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
