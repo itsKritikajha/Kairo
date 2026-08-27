@@ -81,9 +81,15 @@ def init_db():
         note_id = "note_dsa_1"
         cursor.execute(
             "INSERT INTO notes (id, user_id, title, content, folder, ai_summary) VALUES (?, ?, ?, ?, ?, ?)",
-            (note_id, demo_id, "System Design & Caching Patterns", 
-             "Load balancers distribute traffic across multiple app instances using Round Robin or Least Connections.\n\nRedis is an in-memory key-value store used to cache database query results and reduce P99 latency.",
-             "System Design", "• Key: Redis reduces DB latency\n• Algorithm: Round Robin / Least Connections")
+            (
+                note_id,
+                demo_id,
+                "System Design & Caching Patterns",
+                "Load balancers distribute traffic across multiple app instances using Round Robin or Least Connections.\n\n"
+                "Redis is an in-memory key-value store used to cache database query results to reduce DB latency. Use TTLs and eviction policies to keep cache size bounded and avoid stale data serving.",
+                "System Design",
+                "• Key: Redis reduces DB latency\n• Algorithm: Round Robin / Least Connections"
+            )
         )
         cursor.execute(
             "INSERT INTO flashcards (id, note_id, front, back, mastered) VALUES (?, ?, ?, ?, ?)",
@@ -91,7 +97,7 @@ def init_db():
         )
         cursor.execute(
             "INSERT INTO flashcards (id, note_id, front, back, mastered) VALUES (?, ?, ?, ?, ?)",
-            (str(uuid.uuid4()), note_id, "Explain Load Balancing Round Robin vs Least Connections", "Round Robin distributes sequentially; Least Connections assigns to the server with fewest active connections.", 0)
+            (str(uuid.uuid4()), note_id, "Explain Load Balancing Round Robin vs Least Connections", "Round Robin distributes requests sequentially among servers; Least Connections assigns a request to the server with the fewest active connections.", 0)
         )
 
     conn.commit()
